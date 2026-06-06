@@ -26,3 +26,4 @@ TEMPLATES = [{
 }]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 USE_TZ = True
+BACKUPGRAM_REACHABILITY_TIMEOUT = 1
