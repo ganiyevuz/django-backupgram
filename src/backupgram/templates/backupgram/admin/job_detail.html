@@ -12,6 +12,7 @@
 {% endblock %}
 {% block content %}
 <div class="bg-wrap">
+  <a class="bg-back" href="{% url 'admin:backupgram_jobs' server.pk %}">← Jobs</a>
   <div class="bg-head"><h1>{% if job %}Job {{ job.id }}{% else %}Job{% endif %}</h1></div>
 
   {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
@@ -25,7 +26,5 @@
   <pre class="bg-log">{% for line in job.log_tail %}{{ line }}
 {% endfor %}</pre>
   {% endif %}
-
-  <a class="bg-back" href="{% url 'admin:backupgram_jobs' server.pk %}">← Jobs</a>
 </div>
 {% endblock %}

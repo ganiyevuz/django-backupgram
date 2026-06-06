@@ -10,6 +10,7 @@
 {% endblock %}
 {% block content %}
 <div class="bg-wrap">
+  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
   <div class="bg-head"><h1>Restore</h1></div>
   <p class="bg-sub">{{ server.name }}</p>
 
@@ -23,7 +24,5 @@
     {% for b in backups %}<span class="bg-mono">{{ b.slot }}/{{ b.name }}</span>{% if not forloop.last %}, {% endif %}{% endfor %}
   </p>
   {% endif %}
-
-  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
 </div>
 {% endblock %}

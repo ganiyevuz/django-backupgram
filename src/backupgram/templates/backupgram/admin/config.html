@@ -10,6 +10,7 @@
 {% endblock %}
 {% block content %}
 <div class="bg-wrap">
+  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
   <div class="bg-head"><h1>Runtime config</h1></div>
   <p class="bg-sub">{{ server.name }}</p>
 
@@ -62,7 +63,5 @@
       <form method="post" id="reset-{{ it.key }}" action="{% url 'admin:backupgram_config_reset' server.pk it.key %}">{% csrf_token %}</form>
     {% endif %}
   {% endfor %}
-
-  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
 </div>
 {% endblock %}

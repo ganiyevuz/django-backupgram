@@ -10,6 +10,7 @@
 {% endblock %}
 {% block content %}
 <div class="bg-wrap">
+  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
   <div class="bg-head"><h1>Jobs</h1></div>
   <p class="bg-sub">{{ server.name }}</p>
 
@@ -33,7 +34,5 @@
     {% endfor %}
     </tbody>
   </table>
-
-  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
 </div>
 {% endblock %}
