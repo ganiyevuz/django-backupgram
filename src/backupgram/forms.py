@@ -43,6 +43,12 @@ class RestoreForm(Form):
         cleaned = super().clean()
         has_file = bool(cleaned.get("file"))
         has_tg = bool(cleaned.get("telegram_message_id"))
-        if has_file == has_tg:
-            raise ValidationError("Provide exactly one of file or telegram message id.")
+        if has_file and has_tg:
+            raise ValidationError(
+                "Choose one source — a backup file or a Telegram message ID, not both."
+            )
+        if not has_file and not has_tg:
+            raise ValidationError(
+                "Choose a source — pick a backup file or enter a Telegram message ID."
+            )
         return cleaned
