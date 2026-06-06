@@ -1,47 +1,44 @@
 {% extends "admin/base_site.html" %}
-{% load static %}
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'backupgram/admin.css' %}">{% endblock %}
-{% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a href="{% url 'admin:index' %}">Home</a>
-  › <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a>
-  › <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a>
-  {% block bg_crumb %} › Jobs{% endblock %}
-</div>
-{% endblock %}
+{% block extrastyle %}{{ block.super }}{% include "backupgram/admin/_assets.html" %}{% endblock %}
+{% block breadcrumbs %}{% endblock %}
 {% block content %}
-<div class="bg-header">
-  <h1>Jobs</h1>
-  <span class="bg-sub">{{ server.name }}</span>
+<div class="bgx">
+  <nav class="bgx-crumbs">
+    <a href="{% url 'admin:index' %}">Home</a> /
+    <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a> /
+    <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a> /
+    <span>Jobs</span>
+  </nav>
+
+  <header class="bgx-head">
+    <div><p class="bgx-eyebrow">Activity</p><h1 class="bgx-title">Jobs</h1></div>
+  </header>
+
+  {% if error %}<div class="bgx-notice err">{{ error }}</div>{% endif %}
+
+  <section class="bgx-panel">
+    <div class="bgx-panel-h"><h2>Recent jobs</h2><span class="count">{{ jobs|length }}</span></div>
+    <table class="bgx-table">
+      <thead><tr><th>ID</th><th>Type</th><th>State</th></tr></thead>
+      <tbody>
+      {% for j in jobs %}
+        <tr>
+          <td><a class="bgx-name" href="{% url 'admin:backupgram_job_detail' server.pk j.id %}">{{ j.id }}</a></td>
+          <td>{{ j.type }}</td>
+          <td>
+            {% if j.state == "succeeded" %}<span class="bgx-pill ok">succeeded</span>
+            {% elif j.state == "failed" %}<span class="bgx-pill fail">failed</span>
+            {% elif j.state == "running" or j.state == "queued" %}<span class="bgx-pill run">{{ j.state }}</span>
+            {% else %}<span class="bgx-pill muted">{{ j.state }}</span>{% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3" class="bgx-empty">No jobs yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <a class="bgx-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">&larr; Dashboard</a>
 </div>
-{% if error %}<p class="errornote">{{ error }}</p>{% endif %}
-<table class="bg-table">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Type</th>
-      <th>State</th>
-    </tr>
-  </thead>
-  <tbody>
-  {% for j in jobs %}
-    <tr>
-      <td><a href="{% url 'admin:backupgram_job_detail' server.pk j.id %}">{{ j.id }}</a></td>
-      <td>{{ j.type }}</td>
-      <td>
-        {% if j.state == "succeeded" %}
-          <span class="bg-badge ok">succeeded</span>
-        {% elif j.state == "failed" %}
-          <span class="bg-badge fail">failed</span>
-        {% else %}
-          <span class="bg-badge muted">{{ j.state }}</span>
-        {% endif %}
-      </td>
-    </tr>
-  {% empty %}
-    <tr><td colspan="3" class="bg-empty">No jobs yet.</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
-<a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
 {% endblock %}

@@ -119,3 +119,16 @@ def test_jobs_and_detail(admin_client, srv):
         )
     assert jobs.status_code == 200 and b"job1" in jobs.content
     assert detail.status_code == 200 and b"succeeded" in detail.content
+
+
+def test_job_detail_json_returns_job(admin_client, srv):
+    with _patch():
+        resp = admin_client.get(
+            reverse("admin:backupgram_job_detail_json", args=[srv.pk, "job1"])
+        )
+    assert resp.status_code == 200
+    assert resp["Content-Type"] == "application/json"
+    import json
+
+    data = json.loads(resp.content)
+    assert data["id"] == "job1" and data["state"] == "succeeded"

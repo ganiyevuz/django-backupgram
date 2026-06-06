@@ -1,61 +1,59 @@
 {% extends "admin/base_site.html" %}
-{% load static %}
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'backupgram/admin.css' %}">{% endblock %}
-{% block breadcrumbs %}
-<div class="breadcrumbs">
-  <a href="{% url 'admin:index' %}">Home</a>
-  › <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a>
-  › <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a>
-  {% block bg_crumb %} › Config{% endblock %}
-</div>
-{% endblock %}
+{% block extrastyle %}{{ block.super }}{% include "backupgram/admin/_assets.html" %}{% endblock %}
+{% block breadcrumbs %}{% endblock %}
 {% block content %}
-<div class="bg-header">
-  <h1>Runtime config</h1>
-  <span class="bg-sub">{{ server.name }}</span>
-</div>
-{% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+<div class="bgx">
+  <nav class="bgx-crumbs">
+    <a href="{% url 'admin:index' %}">Home</a> /
+    <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a> /
+    <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a> /
+    <span>Config</span>
+  </nav>
 
-<form method="post" id="config-save">{% csrf_token %}
-<table class="bg-table">
-  <thead>
-    <tr>
-      <th>Key</th>
-      <th>Value</th>
-      <th>Source</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
+  <header class="bgx-head">
+    <div><p class="bgx-eyebrow">Runtime</p><h1 class="bgx-title">Config</h1></div>
+  </header>
+
+  {% if error %}<div class="bgx-notice err">{{ error }}</div>{% endif %}
+
+  {# Save form. Per-key reset forms live OUTSIDE it (see below) — no nested forms. #}
+  <form method="post" id="config-save">{% csrf_token %}
+  <section class="bgx-panel">
+    <div class="bgx-panel-h"><h2>Whitelisted settings</h2><span class="count">{{ items|length }} keys</span></div>
+    <table class="bgx-table">
+      <thead><tr><th>Key</th><th>Value</th><th>Source</th><th></th></tr></thead>
+      <tbody>
+      {% for it in items %}
+        <tr>
+          <td><span class="bgx-name">{{ it.key }}</span></td>
+          <td>
+            {% if it.secret %}
+              <input type="password" name="{{ it.key }}" form="config-save" placeholder="{% if it.is_set %}set — type to change{% else %}not set{% endif %}">
+            {% else %}
+              <input type="text" name="{{ it.key }}" form="config-save" value="{{ it.value }}">
+            {% endif %}
+          </td>
+          <td><span class="bgx-src {{ it.source }}">{{ it.source }}</span></td>
+          <td class="right">
+            {% if it.source == "override" %}
+              <button type="submit" form="reset-{{ it.key }}" class="bgx-btn sm">Reset</button>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  <div class="bgx-toolbar" style="margin-top:18px"><button class="bgx-btn primary" type="submit">Save changes</button></div>
+  </form>
+
+  {# Standalone reset forms — siblings of the save form (no nesting). #}
   {% for it in items %}
-    <tr>
-      <td><code>{{ it.key }}</code></td>
-      <td>
-        {% if it.secret %}
-          <input type="password" name="{{ it.key }}" form="config-save" placeholder="{% if it.is_set %}set — type to change{% else %}not set{% endif %}">
-        {% else %}
-          <input type="text" name="{{ it.key }}" form="config-save" value="{{ it.value }}">
-        {% endif %}
-      </td>
-      <td>{{ it.source }}</td>
-      <td>
-        {% if it.source == "override" %}
-          <button type="submit" form="reset-{{ it.key }}" class="button">Reset</button>
-        {% endif %}
-      </td>
-    </tr>
+    {% if it.source == "override" %}
+      <form method="post" id="reset-{{ it.key }}" action="{% url 'admin:backupgram_config_reset' server.pk it.key %}">{% csrf_token %}</form>
+    {% endif %}
   {% endfor %}
-  </tbody>
-</table>
-<button class="button default" type="submit">Save changes</button>
-</form>
 
-{# Standalone reset forms — kept OUTSIDE the save form (no nested forms) #}
-{% for it in items %}
-  {% if it.source == "override" %}
-    <form method="post" id="reset-{{ it.key }}" action="{% url 'admin:backupgram_config_reset' server.pk it.key %}">{% csrf_token %}</form>
-  {% endif %}
-{% endfor %}
-
-<a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
+  <a class="bgx-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">&larr; Dashboard</a>
+</div>
 {% endblock %}
