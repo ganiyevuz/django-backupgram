@@ -1,32 +1,29 @@
 {% extends "admin/base_site.html" %}
 {% block extrastyle %}{{ block.super }}{% include "backupgram/admin/_assets.html" %}{% endblock %}
-{% block breadcrumbs %}{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  › <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a>
+  › <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a>
+  › Restore
+</div>
+{% endblock %}
 {% block content %}
-<div class="bgx">
-  <nav class="bgx-crumbs">
-    <a href="{% url 'admin:index' %}">Home</a> /
-    <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a> /
-    <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a> /
-    <span>Restore</span>
-  </nav>
+<div class="bg-wrap">
+  <div class="bg-head"><h1>Restore</h1></div>
+  <p class="bg-sub">{{ server.name }}</p>
 
-  <header class="bgx-head">
-    <div><p class="bgx-eyebrow">Recover</p><h1 class="bgx-title">Restore</h1></div>
-  </header>
-
-  <section class="bgx-panel" style="padding:22px">
-    <form class="bgx-form" method="post">{% csrf_token %}
-      {{ form.as_p }}
-      <button class="bgx-btn primary" type="submit">Start restore</button>
-    </form>
-  </section>
+  <form class="bg-form" method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button class="bg-btn primary" type="submit">Start restore</button>
+  </form>
 
   {% if backups %}
-  <p class="bgx-meta" style="margin-top:16px">Available:
-    {% for b in backups %}<span class="bgx-name">{{ b.slot }}/{{ b.name }}</span>{% if not forloop.last %}, {% endif %}{% endfor %}
+  <p class="bg-sub" style="margin-top:14px">Available:
+    {% for b in backups %}<span class="bg-mono">{{ b.slot }}/{{ b.name }}</span>{% if not forloop.last %}, {% endif %}{% endfor %}
   </p>
   {% endif %}
 
-  <a class="bgx-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">&larr; Dashboard</a>
+  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
 </div>
 {% endblock %}

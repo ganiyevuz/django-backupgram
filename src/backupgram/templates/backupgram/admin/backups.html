@@ -1,44 +1,40 @@
 {% extends "admin/base_site.html" %}
 {% block extrastyle %}{{ block.super }}{% include "backupgram/admin/_assets.html" %}{% endblock %}
-{% block breadcrumbs %}{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  › <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a>
+  › <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a>
+  › Backups
+</div>
+{% endblock %}
 {% block content %}
-<div class="bgx">
-  <nav class="bgx-crumbs">
-    <a href="{% url 'admin:index' %}">Home</a> /
-    <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a> /
-    <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a> /
-    <span>Backups</span>
-  </nav>
+<div class="bg-wrap">
+  <div class="bg-head"><h1>Backups</h1></div>
+  <p class="bg-sub">{{ server.name }}</p>
 
-  <header class="bgx-head">
-    <div><p class="bgx-eyebrow">Inventory</p><h1 class="bgx-title">Backups</h1></div>
-  </header>
+  {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
 
-  {% if error %}<div class="bgx-notice err">{{ error }}</div>{% endif %}
+  <table class="bg-table">
+    <thead><tr><th>Slot</th><th>Name</th><th>Size</th><th></th></tr></thead>
+    <tbody>
+    {% for b in backups %}
+      <tr>
+        <td>{{ b.slot }}</td>
+        <td class="bg-mono">{{ b.name }}</td>
+        <td>{{ b.size|filesizeformat }}</td>
+        <td class="right">
+          <a class="bg-btn sm" href="{% url 'admin:backupgram_download' server.pk b.slot b.name %}">Download</a>
+          <a class="bg-btn sm" href="{% url 'admin:backupgram_restore' server.pk %}?file={{ b.slot }}/{{ b.name }}">Restore</a>
+          <form method="post" action="{% url 'admin:backupgram_delete_backup' server.pk b.slot b.name %}" style="display:inline" onsubmit="return confirm('Delete this backup?')">{% csrf_token %}<button class="bg-btn sm danger" type="submit">Delete</button></form>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="4" class="bg-empty">No backups yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
 
-  <section class="bgx-panel">
-    <div class="bgx-panel-h"><h2>Stored dumps</h2><span class="count">{{ backups|length }} file{{ backups|length|pluralize }}</span></div>
-    <table class="bgx-table">
-      <thead><tr><th>Slot</th><th>Name</th><th>Size</th><th></th></tr></thead>
-      <tbody>
-      {% for b in backups %}
-        <tr>
-          <td><span class="bgx-pill muted">{{ b.slot }}</span></td>
-          <td><span class="bgx-name">{{ b.name }}</span> <button type="button" class="bgx-copy" data-copy="{{ b.slot }}/{{ b.name }}">copy</button></td>
-          <td>{{ b.size|filesizeformat }}</td>
-          <td class="right">
-            <a class="bgx-btn sm" href="{% url 'admin:backupgram_download' server.pk b.slot b.name %}">Download</a>
-            <a class="bgx-btn sm" href="{% url 'admin:backupgram_restore' server.pk %}?file={{ b.slot }}/{{ b.name }}">Restore</a>
-            <form class="bgx-inline" method="post" action="{% url 'admin:backupgram_delete_backup' server.pk b.slot b.name %}" data-confirm="Delete this backup? This cannot be undone.">{% csrf_token %}<button class="bgx-btn sm danger" type="submit">Delete</button></form>
-          </td>
-        </tr>
-      {% empty %}
-        <tr><td colspan="4" class="bgx-empty">No backups yet — run one from the dashboard.</td></tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </section>
-
-  <a class="bgx-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">&larr; Dashboard</a>
+  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
 </div>
 {% endblock %}

@@ -6,7 +6,7 @@ from urllib.parse import quote
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.admin import ModelAdmin, register
-from django.http import HttpResponseNotAllowed, JsonResponse, StreamingHttpResponse
+from django.http import HttpResponseNotAllowed, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
@@ -91,11 +91,6 @@ class BackupServerAdmin(ModelAdmin):
                 "<uuid:pk>/jobs/<job_id>/",
                 av(self.job_detail_view),
                 name="backupgram_job_detail",
-            ),
-            path(
-                "<uuid:pk>/jobs/<job_id>/json/",
-                av(self.job_detail_json),
-                name="backupgram_job_detail_json",
             ),
             path(
                 "<uuid:pk>/config/",
@@ -251,15 +246,6 @@ class BackupServerAdmin(ModelAdmin):
             "backupgram/admin/job_detail.html",
             self._ctx(request, server, job=job, error=error, running=running),
         )
-
-    def job_detail_json(self, request, pk, job_id):
-        """JSON for the live job-detail poller (no full-page reload)."""
-        server = get_object_or_404(BackupServer, pk=pk)
-        try:
-            job = BackupgramClient.from_server(server).get_job(job_id)
-        except BackupgramAPIError as exc:
-            return JsonResponse({"error": str(exc)}, status=exc.status or 502)
-        return JsonResponse(job)
 
     def config_view(self, request, pk):
         server = get_object_or_404(BackupServer, pk=pk)

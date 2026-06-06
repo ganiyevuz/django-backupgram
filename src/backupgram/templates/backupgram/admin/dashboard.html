@@ -1,50 +1,39 @@
 {% extends "admin/base_site.html" %}
 {% block extrastyle %}{{ block.super }}{% include "backupgram/admin/_assets.html" %}{% endblock %}
-{% block breadcrumbs %}{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  › <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a>
+  › {{ server.name }}
+</div>
+{% endblock %}
 {% block content %}
-<div class="bgx">
-  <nav class="bgx-crumbs">
-    <a href="{% url 'admin:index' %}">Home</a> /
-    <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a> /
-    <span>{{ server.name }}</span>
-  </nav>
+<div class="bg-wrap">
+  <div class="bg-head"><h1>{{ server.name }}</h1></div>
+  <p class="bg-sub">{{ server.base_url }} ·
+    {% if status %}<span class="bg-ok">connected</span>{% else %}<span class="bg-fail">unreachable</span>{% endif %}
+  </p>
 
-  <header class="bgx-head">
-    <div>
-      <p class="bgx-eyebrow">Backup console</p>
-      <h1 class="bgx-title">{{ server.name }}</h1>
-      <p class="bgx-meta">{{ server.base_url }}</p>
-    </div>
-    <span class="bgx-live">
-      <span class="bgx-dot {% if status %}on{% else %}off{% endif %}"></span>
-      {% if status %}connected{% else %}unreachable{% endif %}
-    </span>
-  </header>
+  <div class="bg-actions">
+    <form method="post" action="{% url 'admin:backupgram_backup' server.pk %}">{% csrf_token %}<button class="bg-btn primary" type="submit">Run backup</button></form>
+    <a class="bg-btn" href="{% url 'admin:backupgram_backups' server.pk %}">Backups</a>
+    <a class="bg-btn" href="{% url 'admin:backupgram_jobs' server.pk %}">Jobs</a>
+    <a class="bg-btn" href="{% url 'admin:backupgram_config' server.pk %}">Config</a>
+  </div>
 
-  {% if error %}<div class="bgx-notice err">{{ error }}</div>{% endif %}
+  {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
 
   {% if status %}
-  <section class="bgx-cards">
-    <div class="bgx-card"><div class="k">Schedule</div><div class="v mono">{{ status.schedule }}</div></div>
-    <div class="bgx-card"><div class="k">Cluster mode</div><div class="v">{{ status.cluster|yesno:"On,Off" }}</div></div>
+  <div class="bg-cards">
+    <div class="bg-card"><div class="k">Schedule</div><div class="v bg-mono">{{ status.schedule }}</div></div>
+    <div class="bg-card"><div class="k">Cluster</div><div class="v">{{ status.cluster|yesno:"On,Off" }}</div></div>
     {% if status.last_backup %}
-    <div class="bgx-card">
-      <div class="k">Last backup</div>
-      <div class="v">
-        {% if status.last_backup.status == "OK" %}<span class="bgx-pill ok">OK</span>
-        {% else %}<span class="bgx-pill fail">{{ status.last_backup.status }}</span>{% endif %}
-      </div>
+    <div class="bg-card"><div class="k">Last backup</div>
+      <div class="v">{% if status.last_backup.status == "OK" %}<span class="bg-ok">OK</span>{% else %}<span class="bg-fail">{{ status.last_backup.status }}</span>{% endif %}</div>
     </div>
-    <div class="bgx-card"><div class="k">Age</div><div class="v mono">{{ status.last_backup.age_seconds }}s</div></div>
+    <div class="bg-card"><div class="k">Age</div><div class="v bg-mono">{{ status.last_backup.age_seconds }}s</div></div>
     {% endif %}
-  </section>
-  {% endif %}
-
-  <div class="bgx-toolbar">
-    <form class="bgx-inline" method="post" action="{% url 'admin:backupgram_backup' server.pk %}">{% csrf_token %}<button class="bgx-btn primary" type="submit">&#9654; Run backup</button></form>
-    <a class="bgx-btn" href="{% url 'admin:backupgram_backups' server.pk %}">Backups</a>
-    <a class="bgx-btn" href="{% url 'admin:backupgram_jobs' server.pk %}">Jobs</a>
-    <a class="bgx-btn" href="{% url 'admin:backupgram_config' server.pk %}">Config</a>
   </div>
+  {% endif %}
 </div>
 {% endblock %}
