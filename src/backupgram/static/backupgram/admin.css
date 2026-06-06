@@ -12,6 +12,7 @@
 .bg-card { border: 1px solid var(--hairline-color, #e0e0e0); border-radius: 6px; padding: 14px 16px; background: var(--darkened-bg, #f8f8f8); }
 .bg-card .k { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--body-quiet-color, #666); margin-bottom: 6px; }
 .bg-card .v { font-size: 18px; font-weight: 600; word-break: break-word; }
+.bg-card-desc { margin-top: 6px; font-size: 12px; color: var(--body-quiet-color, #666); }
 
 /* status text */
 .bg-ok { color: #2e7d32; font-weight: 600; }

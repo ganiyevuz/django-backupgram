@@ -71,5 +71,10 @@
   }
   ready(function () {
     document.querySelectorAll("input[data-cron]").forEach(wire);
+    // Static, read-only cron descriptions (e.g. the dashboard Schedule card).
+    document.querySelectorAll("[data-cron-text]").forEach(function (el) {
+      var r = describe(el.getAttribute("data-cron-text"));
+      if (r.text) el.textContent = r.text;
+    });
   });
 })();
