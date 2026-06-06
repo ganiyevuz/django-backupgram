@@ -12,7 +12,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html
 
 from backupgram.client import BackupgramAPIError, BackupgramClient
-from backupgram.config_meta import CONFIG_FIELD_META
+from backupgram.config_meta import CONFIG_FIELD_META, GROUP_ORDER
 from backupgram.forms import BackupServerForm, RestoreForm
 from backupgram.models import BackupServer
 
@@ -122,10 +122,17 @@ class BackupServerAdmin(ModelAdmin):
             status = BackupgramClient.from_server(server).status()
         except BackupgramAPIError as exc:
             error = str(exc)
+        recent = []
+        with contextlib.suppress(BackupgramAPIError):
+            recent = sorted(
+                BackupgramClient.from_server(server).list_backups(),
+                key=lambda b: b.get("mtime", 0),
+                reverse=True,
+            )[:5]
         return render(
             request,
             "backupgram/admin/dashboard.html",
-            self._ctx(request, server, status=status, error=error),
+            self._ctx(request, server, status=status, error=error, recent=recent),
         )
 
     def backups_view(self, request, pk):
@@ -303,12 +310,25 @@ class BackupServerAdmin(ModelAdmin):
                     "kind": kind,
                     "help": field_meta.get("help", ""),
                     "choices": choices,
+                    "group": field_meta.get("group", "Other"),
                 }
             )
+        # Build ordered groups for grouped template view
+        group_map: dict[str, list] = {}
+        for item in items:
+            g = item["group"]
+            group_map.setdefault(g, []).append(item)
+        groups = []
+        for g in GROUP_ORDER:
+            if g in group_map:
+                groups.append({"name": g, "items": group_map.pop(g)})
+        # Any remaining unknown groups
+        for g, gitems in group_map.items():
+            groups.append({"name": g, "items": gitems})
         return render(
             request,
             "backupgram/admin/config.html",
-            self._ctx(request, server, items=items, error=error),
+            self._ctx(request, server, items=items, groups=groups, error=error),
         )
 
     def config_reset_view(self, request, pk, key):

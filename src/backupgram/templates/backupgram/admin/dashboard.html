@@ -1,4 +1,5 @@
 {% extends "admin/base_site.html" %}
+{% load bg_extras %}
 {% block extrastyle %}{{ block.super }}{% include "backupgram/admin/_assets.html" %}{% endblock %}
 {% block breadcrumbs %}
 <div class="breadcrumbs">
@@ -9,31 +10,136 @@
 {% endblock %}
 {% block content %}
 <div class="bg-wrap">
-  <div class="bg-head"><h1>{{ server.name }}</h1></div>
-  <p class="bg-sub">{{ server.base_url }} ·
-    {% if status %}<span class="bg-ok">connected</span>{% else %}<span class="bg-fail">unreachable</span>{% endif %}
+
+  {# ── Server identity header ── #}
+  <div class="bg-head">
+    <h1>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:22px;height:22px;vertical-align:-4px;margin-right:6px;color:var(--c-primary)"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>{{ server.name }}
+    </h1>
+  </div>
+  <p class="bg-sub">
+    <span class="bg-mono">{{ server.base_url }}</span>
+    &nbsp;
+    {% if status %}
+      <span class="bg-status-pill ok">Connected</span>
+    {% else %}
+      <span class="bg-status-pill fail">Unreachable</span>
+    {% endif %}
   </p>
 
-  <div class="bg-actions">
-    <form method="post" action="{% url 'admin:backupgram_backup' server.pk %}">{% csrf_token %}<button class="bg-btn primary" type="submit">Run backup</button></form>
-    <a class="bg-btn" href="{% url 'admin:backupgram_backups' server.pk %}">Backups</a>
-    <a class="bg-btn" href="{% url 'admin:backupgram_jobs' server.pk %}">Jobs</a>
-    <a class="bg-btn" href="{% url 'admin:backupgram_config' server.pk %}">Config</a>
+  {# ── Error notice ── #}
+  {% if error %}
+  <div class="bg-notice err" role="alert">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:5px"><circle cx="12" cy="12" r="9"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>{{ error }}
   </div>
+  {% endif %}
 
-  {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
-
+  {# ── KPI cards ── #}
   {% if status %}
   <div class="bg-cards">
-    <div class="bg-card"><div class="k">Schedule</div><div class="v bg-mono">{{ status.schedule }}</div><div class="bg-card-desc" data-cron-text="{{ status.schedule }}"></div></div>
-    <div class="bg-card"><div class="k">Cluster</div><div class="v">{{ status.cluster|yesno:"On,Off" }}</div></div>
-    {% if status.last_backup %}
-    <div class="bg-card"><div class="k">Last backup</div>
-      <div class="v">{% if status.last_backup.status == "OK" %}<span class="bg-ok">OK</span>{% else %}<span class="bg-fail">{{ status.last_backup.status }}</span>{% endif %}</div>
+    <div class="bg-card">
+      <div class="k">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Schedule
+      </div>
+      <div class="v mono">{{ status.schedule }}</div>
+      <div class="bg-card-desc" data-cron-text="{{ status.schedule }}"></div>
     </div>
-    <div class="bg-card"><div class="k">Age</div><div class="v bg-mono">{{ status.last_backup.age_seconds }}s</div></div>
+    <div class="bg-card">
+      <div class="k">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="13" width="18" height="7" rx="2"/><path d="M7 7.5h.01M7 16.5h.01"/></svg>Cluster mode
+      </div>
+      <div class="v">{{ status.cluster|yesno:"On,Off" }}</div>
+    </div>
+    {% if status.last_backup %}
+    <div class="bg-card">
+      <div class="k">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>Last backup
+      </div>
+      <div class="v">
+        {% if status.last_backup.status == "OK" %}
+          <span class="bg-ok">OK</span>
+        {% else %}
+          <span class="bg-fail">{{ status.last_backup.status }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div class="bg-card">
+      <div class="k">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Age
+      </div>
+      <div class="v mono">{{ status.last_backup.age_seconds }}s</div>
+    </div>
     {% endif %}
   </div>
   {% endif %}
+
+  {# ── Primary actions ── #}
+  <div class="bg-actions">
+    <form method="post" action="{% url 'admin:backupgram_backup' server.pk %}">
+      {% csrf_token %}
+      <button class="bg-btn primary" type="submit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9V3z"/></svg>
+        Run backup
+      </button>
+    </form>
+    <a class="bg-btn" href="{% url 'admin:backupgram_backups' server.pk %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      Backups
+    </a>
+    <a class="bg-btn" href="{% url 'admin:backupgram_jobs' server.pk %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      Jobs
+    </a>
+    <a class="bg-btn" href="{% url 'admin:backupgram_restore' server.pk %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+      Restore
+    </a>
+    <a class="bg-btn" href="{% url 'admin:backupgram_config' server.pk %}">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.9 1.2V23a2 2 0 11-4 0v-.1A1.7 1.7 0 005 21.1l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.7 1.7 0 002.6 15H2.5a2 2 0 110-4h.1A1.7 1.7 0 004 8.1L3.9 8A2 2 0 116.7 5.2l.1.1A1.7 1.7 0 009.7 4.6V4.5a2 2 0 014 0v.1A1.7 1.7 0 0019 5.9l.1-.1A2 2 0 1121.9 8.6l-.1.1a1.7 1.7 0 00-.3 1.9V11a2 2 0 010 4z"/></svg>
+      Config
+    </a>
+  </div>
+
+  {# ── Recent backups panel ── #}
+  <div class="bg-panel">
+    <div class="bg-panel-h">
+      <span class="bg-panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Recent backups
+      </span>
+      <span class="bg-panel-count">{{ recent|length }}</span>
+    </div>
+    {% if recent %}
+    <table class="bg-table">
+      <thead>
+        <tr>
+          <th>Slot</th>
+          <th>Name</th>
+          <th>Size</th>
+          <th>Age</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for b in recent %}
+        <tr>
+          <td><span class="bg-slot">{{ b.slot }}</span></td>
+          <td class="bg-mono">{{ b.name }}</td>
+          <td>{{ b.size|filesizeformat }}</td>
+          <td class="bg-muted">{{ b.mtime|ago }}</td>
+          <td class="right">
+            <a class="bg-btn sm" href="{% url 'admin:backupgram_download' server.pk b.slot b.name %}" aria-label="Download {{ b.name }}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+              Download
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="bg-empty">No backups yet.</p>
+    {% endif %}
+  </div>
+
 </div>
 {% endblock %}

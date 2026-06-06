@@ -10,58 +10,89 @@
 {% endblock %}
 {% block content %}
 <div class="bg-wrap">
-  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
+
+  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 19l-7-7 7-7"/><path d="M3 12h18"/></svg>
+    Dashboard
+  </a>
+
   <div class="bg-head"><h1>Runtime config</h1></div>
   <p class="bg-sub">{{ server.name }}</p>
 
-  {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+  {% if error %}
+  <div class="bg-notice err" role="alert">{{ error }}</div>
+  {% endif %}
 
-  {# Save form. Per-key reset forms are siblings below it — no nested forms. #}
+  {# ── Save form — wraps ALL groups. Reset forms are siblings outside. ── #}
   <form method="post" id="config-save">{% csrf_token %}
-  <table class="bg-table">
-    <thead><tr><th>Key</th><th>Value</th><th>Source</th><th></th></tr></thead>
-    <tbody>
-    {% for it in items %}
-      <tr>
-        <td class="bg-mono">{{ it.key }}</td>
-        <td>
-          {% if it.kind == "secret" %}
-            <input type="password" name="{{ it.key }}" form="config-save" placeholder="{% if it.is_set %}set — type to change{% else %}not set{% endif %}">
-          {% elif it.kind == "select" %}
-            <select name="{{ it.key }}" form="config-save">
-              {% for opt in it.choices %}<option value="{{ opt.value }}"{% if opt.selected %} selected{% endif %}>{{ opt.label }}</option>{% endfor %}
-            </select>
-          {% elif it.kind == "number" %}
-            <input type="number" name="{{ it.key }}" form="config-save" value="{{ it.value }}">
-          {% elif it.kind == "cron" %}
-            <input type="text" name="{{ it.key }}" form="config-save" value="{{ it.value }}" data-cron data-cron-preview="cron-{{ forloop.counter }}">
-            <div class="bg-cron" id="cron-{{ forloop.counter }}"></div>
-            <div class="bg-cron-presets">
-              <button type="button" class="bg-chip" data-cron-set="@hourly">@hourly</button>
-              <button type="button" class="bg-chip" data-cron-set="@daily">@daily</button>
-              <button type="button" class="bg-chip" data-cron-set="@weekly">@weekly</button>
-              <button type="button" class="bg-chip" data-cron-set="@monthly">@monthly</button>
-            </div>
-          {% else %}
-            <input type="text" name="{{ it.key }}" form="config-save" value="{{ it.value }}">
-          {% endif %}
-          {% if it.help %}<div class="bg-help">{{ it.help }}</div>{% endif %}
-        </td>
-        <td class="bg-muted">{{ it.source }}</td>
-        <td class="right">
-          {% if it.source == "override" %}<button type="submit" form="reset-{{ it.key }}" class="bg-btn sm">Reset</button>{% endif %}
-        </td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
-  <p style="margin-top:14px"><button class="bg-btn primary" type="submit">Save changes</button></p>
+
+  {% for group in groups %}
+  <div class="bg-section">
+    <h2 class="bg-section-h">{{ group.name }}</h2>
+    <table class="bg-table">
+      <thead>
+        <tr>
+          <th>Key</th>
+          <th>Value</th>
+          <th>Source</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for it in group.items %}
+        <tr>
+          <td class="bg-mono">{{ it.key }}</td>
+          <td>
+            {% if it.kind == "secret" %}
+              <input type="password" name="{{ it.key }}" form="config-save" placeholder="{% if it.is_set %}set — type to change{% else %}not set{% endif %}">
+            {% elif it.kind == "select" %}
+              <select name="{{ it.key }}" form="config-save">
+                {% for opt in it.choices %}<option value="{{ opt.value }}"{% if opt.selected %} selected{% endif %}>{{ opt.label }}</option>{% endfor %}
+              </select>
+            {% elif it.kind == "number" %}
+              <input type="number" name="{{ it.key }}" form="config-save" value="{{ it.value }}">
+            {% elif it.kind == "cron" %}
+              <input type="text" name="{{ it.key }}" form="config-save" value="{{ it.value }}" data-cron data-cron-preview="cron-{{ it.key }}">
+              <div class="bg-cron" id="cron-{{ it.key }}"></div>
+              <div class="bg-cron-presets">
+                <button type="button" class="bg-chip" data-cron-set="@hourly">@hourly</button>
+                <button type="button" class="bg-chip" data-cron-set="@daily">@daily</button>
+                <button type="button" class="bg-chip" data-cron-set="@weekly">@weekly</button>
+                <button type="button" class="bg-chip" data-cron-set="@monthly">@monthly</button>
+              </div>
+            {% else %}
+              <input type="text" name="{{ it.key }}" form="config-save" value="{{ it.value }}">
+            {% endif %}
+            {% if it.help %}<div class="bg-help">{{ it.help }}</div>{% endif %}
+          </td>
+          <td class="bg-muted">{{ it.source }}</td>
+          <td class="right">
+            {% if it.source == "override" %}
+              <button type="submit" form="reset-{{ it.key }}" class="bg-btn sm">Reset</button>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endfor %}
+
+  <div class="bg-save-bar">
+    <button class="bg-btn primary" type="submit">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 12.5l2.5 2.5 4.5-5"/><circle cx="12" cy="12" r="9"/></svg>
+      Save changes
+    </button>
+  </div>
+
   </form>
 
+  {# ── Per-key reset forms — siblings of the save form, never nested ── #}
   {% for it in items %}
     {% if it.source == "override" %}
       <form method="post" id="reset-{{ it.key }}" action="{% url 'admin:backupgram_config_reset' server.pk it.key %}">{% csrf_token %}</form>
     {% endif %}
   {% endfor %}
+
 </div>
 {% endblock %}

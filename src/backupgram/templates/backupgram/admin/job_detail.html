@@ -12,19 +12,61 @@
 {% endblock %}
 {% block content %}
 <div class="bg-wrap">
-  <a class="bg-back" href="{% url 'admin:backupgram_jobs' server.pk %}">← Jobs</a>
-  <div class="bg-head"><h1>{% if job %}Job {{ job.id }}{% else %}Job{% endif %}</h1></div>
 
-  {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+  <a class="bg-back" href="{% url 'admin:backupgram_jobs' server.pk %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 19l-7-7 7-7"/><path d="M3 12h18"/></svg>
+    Jobs
+  </a>
 
   {% if job %}
-  <p class="bg-sub">
-    Type: {{ job.type }} ·
-    State: {% if job.state == "succeeded" %}<span class="bg-ok">{{ job.state }}</span>{% elif job.state == "failed" %}<span class="bg-fail">{{ job.state }}</span>{% else %}<span class="bg-muted">{{ job.state }}</span>{% endif %} ·
-    Exit: {{ job.exit_code }}{% if running %} · <span class="bg-muted">auto-refreshing…</span>{% endif %}
-  </p>
-  <pre class="bg-log">{% for line in job.log_tail %}{{ line }}
-{% endfor %}</pre>
+  <div class="bg-head"><h1>Job {{ job.id }}</h1></div>
+
+  {% if error %}
+  <div class="bg-notice err" role="alert">{{ error }}</div>
   {% endif %}
+
+  {# ── Status hero row ── #}
+  <div class="bg-cards" style="margin-bottom:calc(var(--sp)*2)">
+    <div class="bg-card">
+      <div class="k">State</div>
+      <div class="v">
+        {% if job.state == "succeeded" %}
+          <span class="bg-status-pill ok">{{ job.state }}</span>
+        {% elif job.state == "failed" %}
+          <span class="bg-status-pill fail">{{ job.state }}</span>
+        {% else %}
+          <span class="bg-muted">{{ job.state }}</span>
+        {% endif %}
+        {% if running %}<span class="bg-muted" style="font-size:12px;margin-left:8px">auto-refreshing…</span>{% endif %}
+      </div>
+    </div>
+    <div class="bg-card">
+      <div class="k">Type</div>
+      <div class="v">{{ job.type }}</div>
+    </div>
+    <div class="bg-card">
+      <div class="k">Exit code</div>
+      <div class="v mono">{{ job.exit_code }}</div>
+    </div>
+  </div>
+
+  {# ── Log output panel ── #}
+  <div class="bg-panel">
+    <div class="bg-panel-h">
+      <span class="bg-panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Output
+      </span>
+    </div>
+    <pre class="bg-log" style="border:none;border-radius:0;margin:0">{% for line in job.log_tail %}{{ line }}
+{% endfor %}</pre>
+  </div>
+
+  {% else %}
+  {% if error %}
+  <div class="bg-notice err" role="alert">{{ error }}</div>
+  {% endif %}
+  <p class="bg-muted">Job not found.</p>
+  {% endif %}
+
 </div>
 {% endblock %}

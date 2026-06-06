@@ -10,29 +10,57 @@
 {% endblock %}
 {% block content %}
 <div class="bg-wrap">
-  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
+
+  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 19l-7-7 7-7"/><path d="M3 12h18"/></svg>
+    Dashboard
+  </a>
+
   <div class="bg-head"><h1>Jobs</h1></div>
   <p class="bg-sub">{{ server.name }}</p>
 
-  {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+  {% if error %}
+  <div class="bg-notice err" role="alert">{{ error }}</div>
+  {% endif %}
 
-  <table class="bg-table">
-    <thead><tr><th>ID</th><th>Type</th><th>State</th></tr></thead>
-    <tbody>
-    {% for j in jobs %}
-      <tr>
-        <td class="bg-mono"><a href="{% url 'admin:backupgram_job_detail' server.pk j.id %}">{{ j.id }}</a></td>
-        <td>{{ j.type }}</td>
-        <td>
-          {% if j.state == "succeeded" %}<span class="bg-ok">succeeded</span>
-          {% elif j.state == "failed" %}<span class="bg-fail">failed</span>
-          {% else %}<span class="bg-muted">{{ j.state }}</span>{% endif %}
-        </td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="3" class="bg-empty">No jobs yet.</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <div class="bg-panel">
+    <div class="bg-panel-h">
+      <span class="bg-panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Job history
+      </span>
+      <span class="bg-panel-count">{{ jobs|length }}</span>
+    </div>
+    <table class="bg-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Type</th>
+          <th>State</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for j in jobs %}
+        <tr>
+          <td class="bg-mono">
+            <a href="{% url 'admin:backupgram_job_detail' server.pk j.id %}">{{ j.id }}</a>
+          </td>
+          <td>{{ j.type }}</td>
+          <td>
+            {% if j.state == "succeeded" %}
+              <span class="bg-status-pill ok">{{ j.state }}</span>
+            {% elif j.state == "failed" %}
+              <span class="bg-status-pill fail">{{ j.state }}</span>
+            {% else %}
+              <span class="bg-muted">{{ j.state }}</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="3" class="bg-empty">No jobs yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 </div>
 {% endblock %}

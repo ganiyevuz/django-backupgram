@@ -1,4 +1,5 @@
 {% extends "admin/base_site.html" %}
+{% load bg_extras %}
 {% block extrastyle %}{{ block.super }}{% include "backupgram/admin/_assets.html" %}{% endblock %}
 {% block breadcrumbs %}
 <div class="breadcrumbs">
@@ -10,30 +11,67 @@
 {% endblock %}
 {% block content %}
 <div class="bg-wrap">
-  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
+
+  <a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 19l-7-7 7-7"/><path d="M3 12h18"/></svg>
+    Dashboard
+  </a>
+
   <div class="bg-head"><h1>Backups</h1></div>
   <p class="bg-sub">{{ server.name }}</p>
 
-  {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+  {% if error %}
+  <div class="bg-notice err" role="alert">{{ error }}</div>
+  {% endif %}
 
-  <table class="bg-table">
-    <thead><tr><th>Slot</th><th>Name</th><th>Size</th><th></th></tr></thead>
-    <tbody>
-    {% for b in backups %}
-      <tr>
-        <td>{{ b.slot }}</td>
-        <td class="bg-mono">{{ b.name }}</td>
-        <td>{{ b.size|filesizeformat }}</td>
-        <td class="right">
-          <a class="bg-btn sm" href="{% url 'admin:backupgram_download' server.pk b.slot b.name %}">Download</a>
-          <a class="bg-btn sm" href="{% url 'admin:backupgram_restore' server.pk %}?file={{ b.slot }}/{{ b.name }}">Restore</a>
-          <form method="post" action="{% url 'admin:backupgram_delete_backup' server.pk b.slot b.name %}" style="display:inline" onsubmit="return confirm('Delete this backup?')">{% csrf_token %}<button class="bg-btn sm danger" type="submit">Delete</button></form>
-        </td>
-      </tr>
-    {% empty %}
-      <tr><td colspan="4" class="bg-empty">No backups yet.</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <div class="bg-panel">
+    <div class="bg-panel-h">
+      <span class="bg-panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>All backup files
+      </span>
+      <span class="bg-panel-count">{{ backups|length }}</span>
+    </div>
+    <table class="bg-table">
+      <thead>
+        <tr>
+          <th>Slot</th>
+          <th>Name</th>
+          <th>Size</th>
+          <th>Age</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for b in backups %}
+        <tr>
+          <td><span class="bg-slot">{{ b.slot }}</span></td>
+          <td class="bg-mono">{{ b.name }}</td>
+          <td>{{ b.size|filesizeformat }}</td>
+          <td class="bg-muted">{{ b.mtime|ago }}</td>
+          <td class="right">
+            <a class="bg-btn sm" href="{% url 'admin:backupgram_download' server.pk b.slot b.name %}" aria-label="Download {{ b.name }}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+              Download
+            </a>
+            <a class="bg-btn sm" href="{% url 'admin:backupgram_restore' server.pk %}?file={{ b.slot }}/{{ b.name }}" aria-label="Restore {{ b.name }}">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+              Restore
+            </a>
+            <form method="post" action="{% url 'admin:backupgram_delete_backup' server.pk b.slot b.name %}" style="display:inline" onsubmit="return confirm('Delete this backup?')">
+              {% csrf_token %}
+              <button class="bg-btn sm danger" type="submit" aria-label="Delete {{ b.name }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg>
+                Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr><td colspan="5" class="bg-empty">No backups yet.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
 </div>
 {% endblock %}
