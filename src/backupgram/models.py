@@ -8,17 +8,21 @@ from django.db.models import (
     DateTimeField,
     Model,
     PositiveIntegerField,
-    URLField,
     UUIDField,
 )
 
 from backupgram.fields import EncryptedTextField
+from backupgram.validators import validate_base_url
 
 
 class BackupServer(Model):
     id = UUIDField(primary_key=True, default=uuid4, editable=False)
     name = CharField(max_length=100, unique=True)
-    base_url = URLField(help_text="REST API base, e.g. https://host:8081")
+    base_url = CharField(
+        max_length=255,
+        validators=[validate_base_url],
+        help_text="REST API base URL; Docker service names allowed.",
+    )
     token = EncryptedTextField(help_text="Admin bearer token (stored encrypted).")
     verify_tls = BooleanField(default=True)
     timeout = PositiveIntegerField(default=30, help_text="Request timeout (seconds).")

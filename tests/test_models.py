@@ -29,3 +29,11 @@ def test_defaults_and_str():
     assert s.verify_tls is True
     assert s.timeout == 30
     assert str(s) == "staging"
+
+
+def test_single_label_host_allowed():
+    s = BackupServer.objects.create(
+        name="dockernet", base_url="https://backup:8081", token="t"
+    )
+    s.full_clean()  # must not raise
+    assert s.base_url == "https://backup:8081"
