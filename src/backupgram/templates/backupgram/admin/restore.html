@@ -1,0 +1,10 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>{{ server.name }} — restore</h1>
+<form method="post">{% csrf_token %}
+  {{ form.as_p }}
+  <p>Available backups: {% for b in backups %}<code>{{ b.slot }}/{{ b.name }}</code> {% endfor %}</p>
+  <button class="button" type="submit">Start restore</button>
+</form>
+<p><a href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a></p>
+{% endblock %}

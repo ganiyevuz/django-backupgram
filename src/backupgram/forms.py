@@ -1,6 +1,14 @@
 from __future__ import annotations
 
-from django.forms import CharField, ModelForm, PasswordInput
+from django.core.exceptions import ValidationError
+from django.forms import (
+    BooleanField,
+    CharField,
+    Form,
+    IntegerField,
+    ModelForm,
+    PasswordInput,
+)
 
 from backupgram.models import BackupServer
 
@@ -21,3 +29,20 @@ class BackupServerForm(ModelForm):
         if not token and self.instance.pk:
             return self.instance.token
         return token
+
+
+class RestoreForm(Form):
+    file = CharField(required=False)
+    telegram_message_id = IntegerField(required=False, min_value=1)
+    target_db = CharField(max_length=63)
+    confirm = BooleanField(
+        required=True, error_messages={"required": "You must confirm the restore."}
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        has_file = bool(cleaned.get("file"))
+        has_tg = bool(cleaned.get("telegram_message_id"))
+        if has_file == has_tg:
+            raise ValidationError("Provide exactly one of file or telegram message id.")
+        return cleaned

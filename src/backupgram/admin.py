@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 from urllib.parse import quote
 
 from django.conf import settings
@@ -11,7 +12,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html
 
 from backupgram.client import BackupgramAPIError, BackupgramClient
-from backupgram.forms import BackupServerForm
+from backupgram.forms import BackupServerForm, RestoreForm
 from backupgram.models import BackupServer
 
 
@@ -62,6 +63,26 @@ class BackupServerAdmin(ModelAdmin):
                 "<uuid:pk>/backups/<slot>/<name>/delete/",
                 av(self.delete_backup_view),
                 name="backupgram_delete_backup",
+            ),
+            path(
+                "<uuid:pk>/backup/",
+                av(self.backup_view),
+                name="backupgram_backup",
+            ),
+            path(
+                "<uuid:pk>/restore/",
+                av(self.restore_view),
+                name="backupgram_restore",
+            ),
+            path(
+                "<uuid:pk>/jobs/",
+                av(self.jobs_view),
+                name="backupgram_jobs",
+            ),
+            path(
+                "<uuid:pk>/jobs/<job_id>/",
+                av(self.job_detail_view),
+                name="backupgram_job_detail",
             ),
         ]
         return mine + super().get_urls()
@@ -133,3 +154,77 @@ class BackupServerAdmin(ModelAdmin):
         except BackupgramAPIError as exc:
             messages.error(request, f"Delete failed: {exc}")
         return redirect(reverse("admin:backupgram_backups", args=[server.pk]))
+
+    def backup_view(self, request, pk):
+        if request.method != "POST":
+            return HttpResponseNotAllowed(["POST"])
+        server = get_object_or_404(BackupServer, pk=pk)
+        try:
+            job = BackupgramClient.from_server(server).trigger_backup()
+            messages.success(request, "Backup triggered.")
+            return redirect(
+                reverse("admin:backupgram_job_detail", args=[server.pk, job["job_id"]])
+            )
+        except BackupgramAPIError as exc:
+            messages.error(request, f"Backup failed: {exc}")
+            return redirect(reverse("admin:backupgram_dashboard", args=[server.pk]))
+
+    def restore_view(self, request, pk):
+        server = get_object_or_404(BackupServer, pk=pk)
+        if request.method == "POST":
+            form = RestoreForm(request.POST)
+            if form.is_valid():
+                cd = form.cleaned_data
+                try:
+                    job = BackupgramClient.from_server(server).restore(
+                        file=cd.get("file") or None,
+                        telegram_message_id=cd.get("telegram_message_id") or None,
+                        target_db=cd["target_db"],
+                        confirm=True,
+                    )
+                    messages.success(request, "Restore started.")
+                    return redirect(
+                        reverse(
+                            "admin:backupgram_job_detail",
+                            args=[server.pk, job["job_id"]],
+                        )
+                    )
+                except BackupgramAPIError as exc:
+                    messages.error(request, f"Restore failed: {exc}")
+        else:
+            form = RestoreForm(initial={"file": request.GET.get("file", "")})
+        backups = []
+        with contextlib.suppress(BackupgramAPIError):
+            backups = BackupgramClient.from_server(server).list_backups()
+        return render(
+            request,
+            "backupgram/admin/restore.html",
+            self._ctx(request, server, form=form, backups=backups),
+        )
+
+    def jobs_view(self, request, pk):
+        server = get_object_or_404(BackupServer, pk=pk)
+        jobs, error = [], None
+        try:
+            jobs = BackupgramClient.from_server(server).list_jobs()
+        except BackupgramAPIError as exc:
+            error = str(exc)
+        return render(
+            request,
+            "backupgram/admin/jobs.html",
+            self._ctx(request, server, jobs=jobs, error=error),
+        )
+
+    def job_detail_view(self, request, pk, job_id):
+        server = get_object_or_404(BackupServer, pk=pk)
+        job, error = None, None
+        try:
+            job = BackupgramClient.from_server(server).get_job(job_id)
+        except BackupgramAPIError as exc:
+            error = str(exc)
+        running = bool(job and job.get("state") in ("queued", "running"))
+        return render(
+            request,
+            "backupgram/admin/job_detail.html",
+            self._ctx(request, server, job=job, error=error, running=running),
+        )

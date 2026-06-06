@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+{% block extrahead %}{{ block.super }}{% if running %}<meta http-equiv="refresh" content="3">{% endif %}{% endblock %}
+{% block content %}
+{% if job %}<h1>Job {{ job.id }}</h1>{% else %}<h1>Job</h1>{% endif %}
+{% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+{% if job %}
+  <p>Type: {{ job.type }} · State: <strong>{{ job.state }}</strong> · Exit: {{ job.exit_code }}</p>
+  <pre>{% for line in job.log_tail %}{{ line }}
+{% endfor %}</pre>
+{% endif %}
+<p><a href="{% url 'admin:backupgram_jobs' server.pk %}">← Jobs</a></p>
+{% endblock %}

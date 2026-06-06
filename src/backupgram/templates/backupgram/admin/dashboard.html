@@ -9,5 +9,9 @@
     {% if status.last_backup %}<li>Last backup: {{ status.last_backup.status }} ({{ status.last_backup.age_seconds }}s ago)</li>{% endif %}
   </ul>
 {% endif %}
-<p><a class="button" href="{% url 'admin:backupgram_backups' server.pk %}">Backups</a></p>
+<p>
+  <form method="post" action="{% url 'admin:backupgram_backup' server.pk %}" style="display:inline">{% csrf_token %}<button class="button">Run backup</button></form>
+  <a class="button" href="{% url 'admin:backupgram_backups' server.pk %}">Backups</a>
+  <a class="button" href="{% url 'admin:backupgram_jobs' server.pk %}">Jobs</a>
+</p>
 {% endblock %}
