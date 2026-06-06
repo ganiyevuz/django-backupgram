@@ -30,6 +30,7 @@ dependencies = [
     "Django>=5.2",
     "httpx>=0.27",
     "cryptography>=42",
+    "croniter>=6.2.2",
 ]
 
 [project.urls]

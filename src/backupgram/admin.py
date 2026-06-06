@@ -10,11 +10,13 @@ from django.http import HttpResponseNotAllowed, StreamingHttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import path, reverse
 from django.utils.html import format_html
+from django.utils.timezone import now as tz_now
 
 from backupgram.client import BackupgramAPIError, BackupgramClient
 from backupgram.config_meta import CONFIG_FIELD_META, GROUP_ORDER
 from backupgram.forms import BackupServerForm, RestoreForm
 from backupgram.models import BackupServer
+from backupgram.schedule import next_run as compute_next_run
 
 
 @register(BackupServer)
@@ -129,10 +131,68 @@ class BackupServerAdmin(ModelAdmin):
                 key=lambda b: b.get("mtime", 0),
                 reverse=True,
             )[:5]
+
+        cfg = {}
+        with contextlib.suppress(BackupgramAPIError):
+            cfg = BackupgramClient.from_server(server).get_config()
+
+        def _val(k):
+            return (cfg.get(k) or {}).get("value", "")
+
+        def _set(k):
+            return bool((cfg.get(k) or {}).get("set"))
+
+        upload_method = _val("TELEGRAM_UPLOAD_METHOD") or "smart"
+        bot_set = _set("TELEGRAM_BOT_TOKEN")
+        chat_id = _val("TELEGRAM_CHAT_ID")
+        api_id_set = _set("TELEGRAM_API_ID")
+        api_hash_set = _set("TELEGRAM_API_HASH")
+        telegram_ok = bot_set and bool(chat_id)
+        mtproto_ready = api_id_set and api_hash_set
+
+        warnings = []
+        if upload_method == "mtproto" and not mtproto_ready:
+            warnings.append(
+                "Upload method is 'mtproto' but TELEGRAM_API_ID / TELEGRAM_API_HASH "
+                "are not set — backups will fail until they are configured."
+            )
+        if bot_set and not chat_id:
+            warnings.append(
+                "Bot token is set but TELEGRAM_CHAT_ID is empty"
+                " — Telegram delivery is disabled."
+            )
+        if chat_id and not bot_set:
+            warnings.append(
+                "TELEGRAM_CHAT_ID is set but the bot token is missing"
+                " — Telegram delivery is disabled."
+            )
+
+        info = {
+            "upload_method": upload_method,
+            "telegram_ok": telegram_ok,
+            "mtproto_ready": mtproto_ready,
+            "cluster": bool(status.get("cluster")) if status else False,
+        }
+        nxt = None
+        if status and status.get("schedule"):
+            dt = compute_next_run(status["schedule"], tz_now())
+            if dt is not None:
+                nxt = dt
+
         return render(
             request,
             "backupgram/admin/dashboard.html",
-            self._ctx(request, server, status=status, error=error, recent=recent),
+            self._ctx(
+                request,
+                server,
+                status=status,
+                error=error,
+                recent=recent,
+                info=info,
+                warnings=warnings,
+                next_run=nxt,
+                config_loaded=bool(cfg),
+            ),
         )
 
     def backups_view(self, request, pk):

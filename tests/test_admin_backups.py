@@ -42,6 +42,15 @@ class FakeClient:
     def iter_backup(self, slot, name, chunk_size=1):
         yield b"DUMP"
 
+    def get_config(self):
+        return {
+            "TELEGRAM_UPLOAD_METHOD": {"value": "smart", "source": "base"},
+            "TELEGRAM_CHAT_ID": {"value": "123", "source": "base"},
+            "TELEGRAM_BOT_TOKEN": {"set": True, "source": "base"},
+            "TELEGRAM_API_ID": {"set": False, "source": "base"},
+            "TELEGRAM_API_HASH": {"set": False, "source": "base"},
+        }
+
 
 def _patch():
     return patch(
@@ -55,6 +64,10 @@ def test_dashboard(admin_client, srv):
         resp = admin_client.get(reverse("admin:backupgram_dashboard", args=[srv.pk]))
     assert resp.status_code == 200
     assert b"@daily" in resp.content
+    assert b"Status &amp; configuration" in resp.content
+    assert b"Upload mode" in resp.content
+    assert b"Next backup" in resp.content
+    assert b"Previous backup" in resp.content
 
 
 def test_backups_list(admin_client, srv):

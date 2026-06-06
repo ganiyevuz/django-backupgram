@@ -34,6 +34,13 @@
   </div>
   {% endif %}
 
+  {# ── Warnings ── #}
+  {% for w in warnings %}
+  <div class="bg-notice warn" role="alert">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;vertical-align:-2px;margin-right:6px"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>{{ w }}
+  </div>
+  {% endfor %}
+
   {# ── KPI cards ── #}
   {% if status %}
   <div class="bg-cards">
@@ -70,6 +77,66 @@
       <div class="v mono">{{ status.last_backup.age_seconds }}s</div>
     </div>
     {% endif %}
+  </div>
+  {% endif %}
+
+  {# ── Status & configuration panel ── #}
+  {% if config_loaded or status %}
+  <div class="bg-panel" style="margin-bottom:calc(var(--sp)*3)">
+    <div class="bg-panel-h">
+      <span class="bg-panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-2.9 1.2V23a2 2 0 11-4 0v-.1A1.7 1.7 0 005 21.1l-.1.1a2 2 0 11-2.8-2.8l.1-.1A1.7 1.7 0 002.6 15H2.5a2 2 0 110-4h.1A1.7 1.7 0 004 8.1L3.9 8A2 2 0 116.7 5.2l.1.1A1.7 1.7 0 009.7 4.6V4.5a2 2 0 014 0v.1A1.7 1.7 0 0019 5.9l.1-.1A2 2 0 1121.9 8.6l-.1.1a1.7 1.7 0 00-.3 1.9V11a2 2 0 010 4z"/></svg>Status &amp; configuration
+      </span>
+    </div>
+    <dl class="bg-info">
+      <dt>Upload mode</dt>
+      <dd>{{ info.upload_method }}</dd>
+
+      <dt>Telegram delivery</dt>
+      <dd>
+        {% if info.telegram_ok %}
+          <span class="bg-ok">Connected</span>
+        {% else %}
+          <span class="bg-fail">Not configured</span>
+        {% endif %}
+      </dd>
+
+      <dt>MTProto (large files)</dt>
+      <dd>
+        {% if info.mtproto_ready %}
+          <span class="bg-ok">Ready</span>
+        {% else %}
+          <span class="bg-muted">Not set</span>
+        {% endif %}
+      </dd>
+
+      <dt>Cluster mode</dt>
+      <dd>
+        {% if info.cluster %}
+          <span class="bg-ok">On</span>
+        {% else %}
+          <span class="bg-muted">Off</span>
+        {% endif %}
+      </dd>
+
+      <dt>Previous backup</dt>
+      <dd>
+        {% if status.last_backup.timestamp %}
+          {{ status.last_backup.timestamp|ago }}
+        {% else %}
+          <span class="bg-muted">never</span>
+        {% endif %}
+      </dd>
+
+      <dt>Next backup</dt>
+      <dd>
+        {% if next_run %}
+          {{ next_run|timeuntil }} <span class="bg-muted">({{ next_run|date:"M j, H:i" }})</span>
+        {% else %}
+          <span class="bg-muted">—</span>
+        {% endif %}
+      </dd>
+    </dl>
   </div>
   {% endif %}
 
