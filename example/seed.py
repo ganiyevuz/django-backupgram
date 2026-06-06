@@ -42,5 +42,7 @@ if not created:
     server.token = TOKEN
     server.verify_tls = False
     server.save()
-print(f"{'✅ created' if created else 'ℹ️  updated'} BackupServer 'local' → {server.base_url}")
-print("\nNext:  uv run python example/manage.py runserver  →  http://localhost:8000/admin/  (admin/admin)")
+verb = "✅ created" if created else "ℹ️  updated"
+print(f"{verb} BackupServer 'local' → {server.base_url}")
+print("\nNext:  uv run python example/manage.py runserver")
+print("       http://localhost:8000/admin/   (admin / admin)")
