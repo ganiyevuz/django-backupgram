@@ -1,20 +1,45 @@
 {% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'backupgram/admin.css' %}">{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  › <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a>
+  › <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a>
+  {% block bg_crumb %} › Backups{% endblock %}
+</div>
+{% endblock %}
 {% block content %}
-<h1>{{ server.name }} — backups</h1>
+<div class="bg-header">
+  <h1>Backups</h1>
+  <span class="bg-sub">{{ server.name }}</span>
+</div>
 {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
-<table>
-  <thead><tr><th>Slot</th><th>Name</th><th>Size</th><th></th></tr></thead>
+<table class="bg-table">
+  <thead>
+    <tr>
+      <th>Slot</th>
+      <th>Name</th>
+      <th>Size</th>
+      <th></th>
+    </tr>
+  </thead>
   <tbody>
   {% for b in backups %}
     <tr>
-      <td>{{ b.slot }}</td><td>{{ b.name }}</td><td>{{ b.size }}</td>
-      <td>
-        <a href="{% url 'admin:backupgram_download' server.pk b.slot b.name %}">Download</a> |
-        <form method="post" action="{% url 'admin:backupgram_delete_backup' server.pk b.slot b.name %}" style="display:inline" onsubmit="return confirm('Delete this backup?')">{% csrf_token %}<button class="button">Delete</button></form>
+      <td><span class="bg-badge muted">{{ b.slot }}</span></td>
+      <td>{{ b.name }}</td>
+      <td>{{ b.size|filesizeformat }}</td>
+      <td class="actions">
+        <a class="button" href="{% url 'admin:backupgram_download' server.pk b.slot b.name %}">Download</a>
+        <a class="button" href="{% url 'admin:backupgram_restore' server.pk %}?file={{ b.slot }}/{{ b.name }}">Restore</a>
+        <form class="bg-inline" method="post" action="{% url 'admin:backupgram_delete_backup' server.pk b.slot b.name %}" onsubmit="return confirm('Delete this backup?')">{% csrf_token %}<button class="button" type="submit">Delete</button></form>
       </td>
     </tr>
-  {% empty %}<tr><td colspan="4">No backups.</td></tr>{% endfor %}
+  {% empty %}
+    <tr><td colspan="4" class="bg-empty">No backups yet.</td></tr>
+  {% endfor %}
   </tbody>
 </table>
-<p><a href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a></p>
+<a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
 {% endblock %}

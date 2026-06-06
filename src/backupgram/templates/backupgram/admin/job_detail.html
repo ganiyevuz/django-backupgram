@@ -1,12 +1,52 @@
 {% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'backupgram/admin.css' %}">{% endblock %}
 {% block extrahead %}{{ block.super }}{% if running %}<meta http-equiv="refresh" content="3">{% endif %}{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  › <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a>
+  › <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a>
+  › <a href="{% url 'admin:backupgram_jobs' server.pk %}">Jobs</a>
+  {% block bg_crumb %}{% if job %} › {{ job.id }}{% endif %}{% endblock %}
+</div>
+{% endblock %}
 {% block content %}
-{% if job %}<h1>Job {{ job.id }}</h1>{% else %}<h1>Job</h1>{% endif %}
+<div class="bg-header">
+  <h1>{% if job %}Job {{ job.id }}{% else %}Job{% endif %}</h1>
+  {% if job %}
+    <span>
+      {% if job.state == "succeeded" %}
+        <span class="bg-badge ok">{{ job.state }}</span>
+      {% elif job.state == "failed" %}
+        <span class="bg-badge fail">{{ job.state }}</span>
+      {% else %}
+        <span class="bg-badge muted">{{ job.state }}</span>
+      {% endif %}
+    </span>
+  {% endif %}
+</div>
 {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
 {% if job %}
-  <p>Type: {{ job.type }} · State: <strong>{{ job.state }}</strong> · Exit: {{ job.exit_code }}</p>
-  <pre>{% for line in job.log_tail %}{{ line }}
-{% endfor %}</pre>
+<div class="bg-cards">
+  <div class="bg-card">
+    <div class="label">Type</div>
+    <div class="value">{{ job.type }}</div>
+  </div>
+  <div class="bg-card">
+    <div class="label">Exit code</div>
+    <div class="value">{{ job.exit_code }}</div>
+  </div>
+  {% if running %}
+  <div class="bg-card">
+    <div class="label">Live</div>
+    <div class="value bg-sub">auto-refreshing…</div>
+  </div>
+  {% endif %}
+</div>
+<div class="label" style="margin-bottom:6px;text-transform:uppercase;font-size:11px;color:var(--body-quiet-color,#666)">Log tail</div>
+<div class="bg-log">{% for line in job.log_tail %}{{ line }}
+{% endfor %}</div>
 {% endif %}
-<p><a href="{% url 'admin:backupgram_jobs' server.pk %}">← Jobs</a></p>
+<a class="bg-back" href="{% url 'admin:backupgram_jobs' server.pk %}">← Jobs</a>
 {% endblock %}

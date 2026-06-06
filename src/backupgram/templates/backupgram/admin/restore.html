@@ -1,10 +1,27 @@
 {% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'backupgram/admin.css' %}">{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  › <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a>
+  › <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a>
+  {% block bg_crumb %} › Restore{% endblock %}
+</div>
+{% endblock %}
 {% block content %}
-<h1>{{ server.name }} — restore</h1>
-<form method="post">{% csrf_token %}
-  {{ form.as_p }}
-  <p>Available backups: {% for b in backups %}<code>{{ b.slot }}/{{ b.name }}</code> {% endfor %}</p>
-  <button class="button" type="submit">Start restore</button>
-</form>
-<p><a href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a></p>
+<div class="bg-header">
+  <h1>Restore</h1>
+  <span class="bg-sub">{{ server.name }}</span>
+</div>
+<div class="bg-card" style="max-width:560px">
+  <form method="post">{% csrf_token %}
+    {{ form.as_p }}
+    <button class="button default" type="submit">Start restore</button>
+  </form>
+</div>
+{% if backups %}
+<p class="bg-sub" style="margin-top:14px">Available: {% for b in backups %}<code>{{ b.slot }}/{{ b.name }}</code> {% endfor %}</p>
+{% endif %}
+<a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
 {% endblock %}

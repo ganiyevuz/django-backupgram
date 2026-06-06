@@ -1,11 +1,31 @@
 {% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'backupgram/admin.css' %}">{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  › <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a>
+  › <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a>
+  {% block bg_crumb %} › Config{% endblock %}
+</div>
+{% endblock %}
 {% block content %}
-<h1>{{ server.name }} — runtime config</h1>
+<div class="bg-header">
+  <h1>Runtime config</h1>
+  <span class="bg-sub">{{ server.name }}</span>
+</div>
 {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
 
 <form method="post" id="config-save">{% csrf_token %}
-<table>
-  <thead><tr><th>Key</th><th>Value</th><th>Source</th><th></th></tr></thead>
+<table class="bg-table">
+  <thead>
+    <tr>
+      <th>Key</th>
+      <th>Value</th>
+      <th>Source</th>
+      <th></th>
+    </tr>
+  </thead>
   <tbody>
   {% for it in items %}
     <tr>
@@ -37,5 +57,5 @@
   {% endif %}
 {% endfor %}
 
-<p><a href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a></p>
+<a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
 {% endblock %}

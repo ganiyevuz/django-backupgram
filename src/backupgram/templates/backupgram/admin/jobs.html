@@ -1,10 +1,47 @@
 {% extends "admin/base_site.html" %}
+{% load static %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'backupgram/admin.css' %}">{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  › <a href="{% url 'admin:backupgram_backupserver_changelist' %}">Backup servers</a>
+  › <a href="{% url 'admin:backupgram_dashboard' server.pk %}">{{ server.name }}</a>
+  {% block bg_crumb %} › Jobs{% endblock %}
+</div>
+{% endblock %}
 {% block content %}
-<h1>{{ server.name }} — jobs</h1>
+<div class="bg-header">
+  <h1>Jobs</h1>
+  <span class="bg-sub">{{ server.name }}</span>
+</div>
 {% if error %}<p class="errornote">{{ error }}</p>{% endif %}
-<table><thead><tr><th>ID</th><th>Type</th><th>State</th></tr></thead><tbody>
-{% for j in jobs %}<tr><td><a href="{% url 'admin:backupgram_job_detail' server.pk j.id %}">{{ j.id }}</a></td><td>{{ j.type }}</td><td>{{ j.state }}</td></tr>
-{% empty %}<tr><td colspan="3">No jobs.</td></tr>{% endfor %}
-</tbody></table>
-<p><a href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a></p>
+<table class="bg-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Type</th>
+      <th>State</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for j in jobs %}
+    <tr>
+      <td><a href="{% url 'admin:backupgram_job_detail' server.pk j.id %}">{{ j.id }}</a></td>
+      <td>{{ j.type }}</td>
+      <td>
+        {% if j.state == "succeeded" %}
+          <span class="bg-badge ok">succeeded</span>
+        {% elif j.state == "failed" %}
+          <span class="bg-badge fail">failed</span>
+        {% else %}
+          <span class="bg-badge muted">{{ j.state }}</span>
+        {% endif %}
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="3" class="bg-empty">No jobs yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<a class="bg-back" href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a>
 {% endblock %}
