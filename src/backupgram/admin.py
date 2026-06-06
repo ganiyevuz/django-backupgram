@@ -12,6 +12,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html
 
 from backupgram.client import BackupgramAPIError, BackupgramClient
+from backupgram.config_meta import CONFIG_FIELD_META
 from backupgram.forms import BackupServerForm, RestoreForm
 from backupgram.models import BackupServer
 
@@ -282,13 +283,26 @@ class BackupServerAdmin(ModelAdmin):
         items = []
         for key in sorted(config):
             meta = config[key]
+            item_is_secret = "set" in meta
+            value = meta.get("value", "")
+            field_meta = CONFIG_FIELD_META.get(key, {})
+            kind = "secret" if item_is_secret else field_meta.get("kind", "text")
+            choices = None
+            if kind == "select":
+                choices = [
+                    {"value": v, "label": label, "selected": v == value}
+                    for v, label in field_meta["choices"]
+                ]
             items.append(
                 {
                     "key": key,
-                    "secret": "set" in meta,
-                    "value": meta.get("value", ""),
+                    "secret": item_is_secret,
+                    "value": value,
                     "is_set": meta.get("set", False),
                     "source": meta.get("source", ""),
+                    "kind": kind,
+                    "help": field_meta.get("help", ""),
+                    "choices": choices,
                 }
             )
         return render(
