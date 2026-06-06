@@ -213,11 +213,24 @@ html[data-theme="dark"] .bg-wrap {
 
 /* "Open dashboard" button in the changelist (rendered OUTSIDE .bg-wrap, so
    self-contained values + its own dark handling). */
-.bg-manage { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #1e293b; font-size: 12.5px; font-weight: 500; text-decoration: none; transition: border-color .15s ease, color .15s ease; }
-.bg-manage:hover, .bg-manage:focus, .bg-manage:active { border-color: #2563eb; color: #2563eb; text-decoration: none; }
-.bg-manage svg { width: 14px; height: 14px; }
-html[data-theme="dark"] .bg-manage { background: #0f172a; border-color: #334155; color: #e2e8f0; }
-@media (prefers-color-scheme: dark) { html[data-theme="auto"] .bg-manage { background: #0f172a; border-color: #334155; color: #e2e8f0; } }
+a.bg-manage,
+a.bg-manage:link,
+a.bg-manage:visited,
+a.bg-manage:hover,
+a.bg-manage:focus,
+a.bg-manage:active { text-decoration: none !important; }
+a.bg-manage {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 13px; border-radius: 8px; white-space: nowrap;
+  border: 1px solid #cbd5e1; background: #fff; color: #1e293b;
+  font-size: 12.5px; font-weight: 500; line-height: 1.4;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .06);
+  transition: border-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+a.bg-manage:hover, a.bg-manage:focus { border-color: #2563eb; color: #2563eb; box-shadow: 0 2px 7px rgba(37, 99, 235, .18); }
+a.bg-manage svg { width: 14px; height: 14px; }
+html[data-theme="dark"] a.bg-manage { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+@media (prefers-color-scheme: dark) { html[data-theme="auto"] a.bg-manage { background: #0f172a; border-color: #334155; color: #e2e8f0; } }
 
 /* ---------- error notice ---------- */
 .errornote { /* admin class, but ensure on-surface legibility inside .bg-wrap */ }

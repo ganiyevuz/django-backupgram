@@ -64,13 +64,13 @@
         {% endif %}
       </div>
     </div>
+    {% endif %}
     <div class="bg-card">
       <div class="k">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Age
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px;vertical-align:-1px;margin-right:4px"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Next backup
       </div>
-      <div class="v mono">{{ status.last_backup.age_seconds|dur }}</div>
+      <div class="v mono">{% if next_run %}{{ next_run|timeuntil }}{% else %}—{% endif %}</div>
     </div>
-    {% endif %}
   </div>
   {% endif %}
 
@@ -82,7 +82,6 @@
     <div class="bg-mini-card"><div class="k">MTProto</div><div class="v">{% if info.mtproto_ready %}<span class="bg-ok">Ready</span>{% else %}<span class="bg-muted">Not set</span>{% endif %}</div></div>
     <div class="bg-mini-card"><div class="k">Cluster mode</div><div class="v">{% if info.cluster %}On{% else %}<span class="bg-muted">Off</span>{% endif %}</div></div>
     <div class="bg-mini-card"><div class="k">Previous backup</div><div class="v">{% if status.last_backup.timestamp %}{{ status.last_backup.timestamp|ago }}{% else %}<span class="bg-muted">never</span>{% endif %}</div></div>
-    <div class="bg-mini-card"><div class="k">Next backup</div><div class="v">{% if next_run %}{{ next_run|timeuntil }}{% else %}<span class="bg-muted">—</span>{% endif %}</div></div>
   </div>
   {% endif %}
 
