@@ -69,6 +69,25 @@
     if (document.readyState !== "loading") fn();
     else document.addEventListener("DOMContentLoaded", fn);
   }
+  // Restore: click an available backup to fill the form's File field.
+  function wireFillFile() {
+    var input =
+      document.getElementById("id_file") ||
+      document.querySelector('form [name="file"]');
+    if (!input) return;
+    document.querySelectorAll("[data-fill-file]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        input.value = btn.getAttribute("data-fill-file");
+        input.focus();
+        input.scrollIntoView({ block: "center", behavior: "smooth" });
+      });
+    });
+  }
+
+  function ready(fn) {
+    if (document.readyState !== "loading") fn();
+    else document.addEventListener("DOMContentLoaded", fn);
+  }
   ready(function () {
     document.querySelectorAll("input[data-cron]").forEach(wire);
     // Static, read-only cron descriptions (e.g. the dashboard Schedule card).
@@ -76,5 +95,6 @@
       var r = describe(el.getAttribute("data-cron-text"));
       if (r.text) el.textContent = r.text;
     });
+    wireFillFile();
   });
 })();

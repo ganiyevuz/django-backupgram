@@ -25,6 +25,11 @@ class BackupServerAdmin(ModelAdmin):
     list_display = ["name", "base_url", "enabled", "reachable_badge", "manage_link"]
     readonly_fields = ["created_at", "updated_at", "manage_link"]
 
+    class Media:
+        # Load the stylesheet on the changelist/change pages too, so the
+        # "Open dashboard" button is styled there (not just the custom views).
+        css = {"all": ("backupgram/admin.css",)}
+
     @staticmethod
     def _client(server):
         timeout = getattr(settings, "BACKUPGRAM_REACHABILITY_TIMEOUT", 3)
@@ -36,7 +41,13 @@ class BackupServerAdmin(ModelAdmin):
         if obj is None or obj.pk is None:
             return "Save first, then manage backups from the changelist."
         url = reverse("admin:backupgram_dashboard", args=[obj.pk])
-        return format_html('<a class="button" href="{}">Open dashboard →</a>', url)
+        return format_html(
+            '<a class="bg-manage" href="{}">Open dashboard'
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'
+            '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></a>',
+            url,
+        )
 
     manage_link.short_description = "manage"
 

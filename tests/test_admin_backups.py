@@ -64,7 +64,7 @@ def test_dashboard(admin_client, srv):
         resp = admin_client.get(reverse("admin:backupgram_dashboard", args=[srv.pk]))
     assert resp.status_code == 200
     assert b"@daily" in resp.content
-    assert b"Status &amp; configuration" in resp.content
+    assert b"bg-mini-card" in resp.content
     assert b"Upload mode" in resp.content
     assert b"Next backup" in resp.content
     assert b"Previous backup" in resp.content

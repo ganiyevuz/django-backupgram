@@ -197,9 +197,11 @@ html[data-theme="dark"] .bg-wrap {
 }
 
 /* ---------- info definition grid ---------- */
-.bg-info { display: grid; grid-template-columns: max-content 1fr; gap: 10px 20px; padding: calc(var(--sp)*2); }
-.bg-info dt { font-size: 12px; color: var(--c-fg-2); font-weight: 500; }
-.bg-info dd { margin: 0; font-size: 13px; color: var(--c-fg); }
+/* compact status/config cards (smaller than the KPI cards) */
+.bg-mini-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 0 0 calc(var(--sp) * 3); }
+.bg-mini-card { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-sm); padding: 11px 13px; box-shadow: var(--shadow-sm); }
+.bg-mini-card .k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--c-fg-3); margin-bottom: 5px; }
+.bg-mini-card .v { font-size: 14px; font-weight: 600; color: var(--c-fg); word-break: break-word; }
 
 /* ---------- cron editor ---------- */
 .bg-cron { margin-top: 7px; font-size: 12px; color: var(--c-primary); font-family: var(--mono); min-height: 16px; }
@@ -208,6 +210,14 @@ html[data-theme="dark"] .bg-wrap {
 .bg-chip { cursor: pointer; font-family: var(--mono); font-size: 11px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--c-border-strong); background: var(--c-surface); color: var(--c-fg-2); transition: border-color .15s ease, color .15s ease; }
 .bg-chip:hover { border-color: var(--c-primary); color: var(--c-primary); }
 .bg-chip:focus-visible { outline: none; box-shadow: 0 0 0 3px var(--c-ring); }
+
+/* "Open dashboard" button in the changelist (rendered OUTSIDE .bg-wrap, so
+   self-contained values + its own dark handling). */
+.bg-manage { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; color: #1e293b; font-size: 12.5px; font-weight: 500; text-decoration: none; transition: border-color .15s ease, color .15s ease; }
+.bg-manage:hover, .bg-manage:focus, .bg-manage:active { border-color: #2563eb; color: #2563eb; text-decoration: none; }
+.bg-manage svg { width: 14px; height: 14px; }
+html[data-theme="dark"] .bg-manage { background: #0f172a; border-color: #334155; color: #e2e8f0; }
+@media (prefers-color-scheme: dark) { html[data-theme="auto"] .bg-manage { background: #0f172a; border-color: #334155; color: #e2e8f0; } }
 
 /* ---------- error notice ---------- */
 .errornote { /* admin class, but ensure on-surface legibility inside .bg-wrap */ }
