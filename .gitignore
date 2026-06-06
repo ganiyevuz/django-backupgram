@@ -58,9 +58,6 @@ db.sqlite3
 db.sqlite3-journal
 media/
 
-# Example project
-example/
-
 # Flask stuff:
 instance/
 .webassets-cache
@@ -141,3 +138,6 @@ Desktop.ini
 .coverage.*
 coverage.xml
 htmlcov/
+
+# Example project runtime
+example/db.sqlite3
