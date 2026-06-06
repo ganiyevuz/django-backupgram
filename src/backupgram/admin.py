@@ -84,6 +84,16 @@ class BackupServerAdmin(ModelAdmin):
                 av(self.job_detail_view),
                 name="backupgram_job_detail",
             ),
+            path(
+                "<uuid:pk>/config/",
+                av(self.config_view),
+                name="backupgram_config",
+            ),
+            path(
+                "<uuid:pk>/config/<key>/reset/",
+                av(self.config_reset_view),
+                name="backupgram_config_reset",
+            ),
         ]
         return mine + super().get_urls()
 
@@ -228,3 +238,64 @@ class BackupServerAdmin(ModelAdmin):
             "backupgram/admin/job_detail.html",
             self._ctx(request, server, job=job, error=error, running=running),
         )
+
+    def config_view(self, request, pk):
+        server = get_object_or_404(BackupServer, pk=pk)
+        client = BackupgramClient.from_server(server)
+        if request.method == "POST":
+            try:
+                current = client.get_config()
+            except BackupgramAPIError as exc:
+                messages.error(request, f"Could not load config: {exc}")
+                return redirect(reverse("admin:backupgram_config", args=[server.pk]))
+            patch = {}
+            for key, meta in current.items():
+                submitted = request.POST.get(key, "")
+                is_secret = "set" in meta  # secret entries expose {set:bool}, not value
+                if is_secret:
+                    if submitted:  # only send a secret if a new value was typed
+                        patch[key] = submitted
+                elif submitted != meta.get("value", ""):
+                    patch[key] = submitted
+            if patch:
+                try:
+                    client.patch_config(patch)
+                    messages.success(request, f"Updated {', '.join(sorted(patch))}.")
+                except BackupgramAPIError as exc:
+                    messages.error(request, f"Update failed: {exc}")
+            else:
+                messages.info(request, "No changes.")
+            return redirect(reverse("admin:backupgram_config", args=[server.pk]))
+        config, error = {}, None
+        try:
+            config = client.get_config()
+        except BackupgramAPIError as exc:
+            error = str(exc)
+        items = []
+        for key in sorted(config):
+            meta = config[key]
+            items.append(
+                {
+                    "key": key,
+                    "secret": "set" in meta,
+                    "value": meta.get("value", ""),
+                    "is_set": meta.get("set", False),
+                    "source": meta.get("source", ""),
+                }
+            )
+        return render(
+            request,
+            "backupgram/admin/config.html",
+            self._ctx(request, server, items=items, error=error),
+        )
+
+    def config_reset_view(self, request, pk, key):
+        if request.method != "POST":
+            return HttpResponseNotAllowed(["POST"])
+        server = get_object_or_404(BackupServer, pk=pk)
+        try:
+            BackupgramClient.from_server(server).delete_config(key)
+            messages.success(request, f"Reset {key} to base.")
+        except BackupgramAPIError as exc:
+            messages.error(request, f"Reset failed: {exc}")
+        return redirect(reverse("admin:backupgram_config", args=[server.pk]))

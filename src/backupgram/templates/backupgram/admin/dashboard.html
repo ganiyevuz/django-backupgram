@@ -13,5 +13,6 @@
   <form method="post" action="{% url 'admin:backupgram_backup' server.pk %}" style="display:inline">{% csrf_token %}<button class="button">Run backup</button></form>
   <a class="button" href="{% url 'admin:backupgram_backups' server.pk %}">Backups</a>
   <a class="button" href="{% url 'admin:backupgram_jobs' server.pk %}">Jobs</a>
+  <a class="button" href="{% url 'admin:backupgram_config' server.pk %}">Config</a>
 </p>
 {% endblock %}

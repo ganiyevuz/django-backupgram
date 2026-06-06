@@ -1,0 +1,41 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>{{ server.name }} — runtime config</h1>
+{% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+
+<form method="post" id="config-save">{% csrf_token %}
+<table>
+  <thead><tr><th>Key</th><th>Value</th><th>Source</th><th></th></tr></thead>
+  <tbody>
+  {% for it in items %}
+    <tr>
+      <td><code>{{ it.key }}</code></td>
+      <td>
+        {% if it.secret %}
+          <input type="password" name="{{ it.key }}" form="config-save" placeholder="{% if it.is_set %}set — type to change{% else %}not set{% endif %}">
+        {% else %}
+          <input type="text" name="{{ it.key }}" form="config-save" value="{{ it.value }}">
+        {% endif %}
+      </td>
+      <td>{{ it.source }}</td>
+      <td>
+        {% if it.source == "override" %}
+          <button type="submit" form="reset-{{ it.key }}" class="button">Reset</button>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<button class="button default" type="submit">Save changes</button>
+</form>
+
+{# Standalone reset forms — kept OUTSIDE the save form (no nested forms) #}
+{% for it in items %}
+  {% if it.source == "override" %}
+    <form method="post" id="reset-{{ it.key }}" action="{% url 'admin:backupgram_config_reset' server.pk it.key %}">{% csrf_token %}</form>
+  {% endif %}
+{% endfor %}
+
+<p><a href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a></p>
+{% endblock %}
