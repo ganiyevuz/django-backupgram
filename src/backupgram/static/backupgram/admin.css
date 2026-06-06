@@ -40,8 +40,31 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* Dark tokens follow Django admin's theme: explicit dark, or auto + OS dark.
+   When admin theme is "light", dark never applies (so the white theme works
+   even if the OS is in dark mode). */
+html[data-theme="dark"] .bg-wrap {
+  --c-primary: #3b82f6;
+  --c-primary-700: #2563eb;
+  --c-accent: #10b981;
+  --c-accent-700: #059669;
+  --c-danger: #f87171;
+  --c-warn: #fbbf24;
+  --c-bg: #0b1220;
+  --c-surface: #0f172a;
+  --c-muted: #1e293b;
+  --c-fg: #e2e8f0;
+  --c-fg-2: #94a3b8;
+  --c-fg-3: #64748b;
+  --c-border: #243044;
+  --c-border-strong: #334155;
+  --c-ring: rgba(59, 130, 246, 0.4);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 6px 20px -6px rgba(0, 0, 0, 0.6);
+}
+
 @media (prefers-color-scheme: dark) {
-  .bg-wrap {
+  html[data-theme="auto"] .bg-wrap {
     --c-primary: #3b82f6;
     --c-primary-700: #2563eb;
     --c-accent: #10b981;
@@ -61,6 +84,11 @@
     --shadow: 0 6px 20px -6px rgba(0, 0, 0, 0.6);
   }
 }
+
+/* no underlines on our anchors (table links, etc.); color via context */
+.bg-wrap a { text-decoration: none; }
+.bg-table a { color: var(--c-primary); }
+.bg-table a:hover { color: var(--c-primary-700); }
 
 /* ---------- back control ---------- */
 .bg-back {
@@ -231,12 +259,10 @@
 /* ---------- config sections ---------- */
 .bg-section { margin: 0 0 calc(var(--sp) * 4); }
 .bg-section-h {
-  font-size: 13px; font-weight: 600; color: var(--c-fg-2);
-  letter-spacing: .03em; text-transform: uppercase;
+  font-weight: 600; color: var(--c-fg-2);
+  letter-spacing: .06em; text-transform: uppercase;
   font-family: var(--mono); font-size: 11px;
-  padding: 0 0 8px; margin: 0 0 0;
-  border-bottom: 2px solid var(--c-border-strong);
-  margin-bottom: 0;
+  padding: 0; margin: 0 0 10px;
 }
 
 /* ---------- icon-only button (table actions) ---------- */
