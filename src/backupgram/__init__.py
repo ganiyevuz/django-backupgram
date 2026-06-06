@@ -1,1 +1,1 @@
-default_app_config = "backupgram.apps.BackupgramConfig"
+__version__ = "0.1.0"

@@ -20,7 +20,7 @@ fi
 sed -i '' "s/^version = \".*\"/version = \"${VERSION}\"/" pyproject.toml
 
 # Find and update __version__ in any package under src/
-INIT_FILE=$(find src -name '__init__.py' -path '*/src/*/__init__.py' -maxdepth 2 | head -1)
+INIT_FILE=$(find src -maxdepth 2 -name '__init__.py' | head -1)
 if [ -z "$INIT_FILE" ]; then
     echo "Error: no package __init__.py found under src/"
     exit 1
