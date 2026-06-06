@@ -1,0 +1,20 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>{{ server.name }} — backups</h1>
+{% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+<table>
+  <thead><tr><th>Slot</th><th>Name</th><th>Size</th><th></th></tr></thead>
+  <tbody>
+  {% for b in backups %}
+    <tr>
+      <td>{{ b.slot }}</td><td>{{ b.name }}</td><td>{{ b.size }}</td>
+      <td>
+        <a href="{% url 'admin:backupgram_download' server.pk b.slot b.name %}">Download</a> |
+        <form method="post" action="{% url 'admin:backupgram_delete_backup' server.pk b.slot b.name %}" style="display:inline" onsubmit="return confirm('Delete this backup?')">{% csrf_token %}<button class="button">Delete</button></form>
+      </td>
+    </tr>
+  {% empty %}<tr><td colspan="4">No backups.</td></tr>{% endfor %}
+  </tbody>
+</table>
+<p><a href="{% url 'admin:backupgram_dashboard' server.pk %}">← Dashboard</a></p>
+{% endblock %}

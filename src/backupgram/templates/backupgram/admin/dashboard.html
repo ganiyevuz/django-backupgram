@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>{{ server.name }} <small>{{ server.base_url }}</small></h1>
+{% if error %}<p class="errornote">{{ error }}</p>{% endif %}
+{% if status %}
+  <ul>
+    <li>Schedule: {{ status.schedule }}</li>
+    <li>Cluster: {{ status.cluster }}</li>
+    {% if status.last_backup %}<li>Last backup: {{ status.last_backup.status }} ({{ status.last_backup.age_seconds }}s ago)</li>{% endif %}
+  </ul>
+{% endif %}
+<p><a class="button" href="{% url 'admin:backupgram_backups' server.pk %}">Backups</a></p>
+{% endblock %}
