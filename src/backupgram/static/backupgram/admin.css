@@ -85,8 +85,13 @@ html[data-theme="dark"] .bg-wrap {
   }
 }
 
-/* no underlines on our anchors (table links, etc.); color via context */
-.bg-wrap a { text-decoration: none; }
+/* never underline our anchors — covers all states, beats admin's a:hover rule */
+.bg-wrap a,
+.bg-wrap a:link,
+.bg-wrap a:visited,
+.bg-wrap a:hover,
+.bg-wrap a:focus,
+.bg-wrap a:active { text-decoration: none !important; }
 .bg-table a { color: var(--c-primary); }
 .bg-table a:hover { color: var(--c-primary-700); }
 
