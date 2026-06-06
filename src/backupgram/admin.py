@@ -19,8 +19,8 @@ from backupgram.models import BackupServer
 @register(BackupServer)
 class BackupServerAdmin(ModelAdmin):
     form = BackupServerForm
-    list_display = ["name", "base_url", "enabled", "reachable_badge"]
-    readonly_fields = ["created_at", "updated_at"]
+    list_display = ["name", "base_url", "enabled", "reachable_badge", "manage_link"]
+    readonly_fields = ["created_at", "updated_at", "manage_link"]
 
     @staticmethod
     def _client(server):
@@ -28,6 +28,14 @@ class BackupServerAdmin(ModelAdmin):
         return BackupgramClient(
             server.base_url, server.token, verify=server.verify_tls, timeout=timeout
         )
+
+    def manage_link(self, obj):
+        if obj is None or obj.pk is None:
+            return "Save first, then manage backups from the changelist."
+        url = reverse("admin:backupgram_dashboard", args=[obj.pk])
+        return format_html('<a class="button" href="{}">Open dashboard →</a>', url)
+
+    manage_link.short_description = "manage"
 
     def reachable_badge(self, obj):
         try:

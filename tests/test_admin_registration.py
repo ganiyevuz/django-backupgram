@@ -58,3 +58,13 @@ def test_add_sets_token(admin_client):
         },
     )
     assert BackupServer.objects.get(name="new").token == "fresh"
+
+
+def test_changelist_has_manage_link_to_dashboard(admin_client):
+    s = BackupServer.objects.create(
+        name="prod", base_url="https://backup.example.com:8081", token="t"
+    )
+    resp = admin_client.get(reverse("admin:backupgram_backupserver_changelist"))
+    dashboard_url = reverse("admin:backupgram_dashboard", args=[s.pk])
+    assert dashboard_url.encode() in resp.content
+    assert b"Open dashboard" in resp.content
