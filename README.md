@@ -1,11 +1,11 @@
 # django-backupgram
 
-A Django admin control panel for the [postgres-backup REST API](https://github.com/ganiyevuz/docker-postgres-backup-telegram).
+A Django admin control panel for the [backupgram REST API](https://github.com/ganiyevuz/backupgram).
 
 ## What it is
 
 `django-backupgram` is a thin Django admin client. It talks to one or more
-[postgres-backup-telegram](https://github.com/ganiyevuz/docker-postgres-backup-telegram)
+[backupgram](https://github.com/ganiyevuz/backupgram)
 containers over their REST API, letting you:
 
 - **Trigger backups** on demand
@@ -26,7 +26,7 @@ the containers. `django-backupgram` is only the admin UI that drives them.
   `REST_API_ENABLE=TRUE` and a `REST_API_TOKEN` set
 
 See the backup container's
-[REST API docs](https://github.com/ganiyevuz/docker-postgres-backup-telegram/blob/main/docs/REST_API.md)
+[REST API docs](https://github.com/ganiyevuz/backupgram/blob/main/docs/REST_API.md)
 for how to enable the API.
 
 ## Install
@@ -80,7 +80,7 @@ admin. The container compares it in constant time and refuses to start if the AP
 is enabled without one; here it is stored **encrypted at rest** and sent only
 server-side. To **rotate**: change it on the container, recreate it, and update
 the Token field. See the
-[REST API auth docs](https://github.com/ganiyevuz/docker-postgres-backup-telegram/blob/main/docs/REST_API.md#authentication).
+[REST API auth docs](https://github.com/ganiyevuz/backupgram/blob/main/docs/REST_API.md#authentication).
 
 ## Usage
 
@@ -129,6 +129,6 @@ uv run pytest
 
 ## Links
 
-- Backup container: <https://github.com/ganiyevuz/docker-postgres-backup-telegram>
-- REST API reference: <https://github.com/ganiyevuz/docker-postgres-backup-telegram/blob/main/docs/REST_API.md>
+- Backup container: <https://github.com/ganiyevuz/backupgram>
+- REST API reference: <https://github.com/ganiyevuz/backupgram/blob/main/docs/REST_API.md>
 - This package: <https://github.com/ganiyevuz/django-backupgram>

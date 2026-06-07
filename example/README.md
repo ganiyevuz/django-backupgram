@@ -9,7 +9,7 @@ A reachable backup container with the REST API enabled. The companion repo's
 `docker-compose.local.yml` publishes it on `127.0.0.1:8081` with token `devsecret`:
 
 ```sh
-# in the docker-postgres-backup-tool repo:
+# in the backupgram repo:
 docker compose -f docker-compose.local.yml up -d
 ```
 

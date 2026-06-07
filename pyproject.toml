@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "django-backupgram"
 version = "0.1.0"
-description = "Django admin control panel for the postgres-backup REST API (backupgram)."
+description = "Django admin control panel for the backupgram REST API (PostgreSQL backups over HTTP)."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
