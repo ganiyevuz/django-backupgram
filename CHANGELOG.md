@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-06-07
+
+### Removed
+
+- **`django-jazzmin` dependency.** It was never used by the package — every admin
+  view extends Django's built-in `admin/base_site.html` — so it no longer forces
+  installs to pull in jazzmin or adopt that admin theme. Add any admin theme you
+  like in your own project. (Also dropped from the bundled `example/` settings.)
+
 ## [0.1.0] - 2026-06-07
 
 Initial release — a Django admin control panel for the `backupgram`
@@ -56,5 +65,6 @@ backups itself, it drives one or more backup containers over their REST API.
   actions are POST + CSRF + explicit confirm, and config secrets are masked
   (write-only). **Note:** rotating `SECRET_KEY` invalidates stored tokens.
 
-[Unreleased]: https://github.com/ganiyevuz/django-backupgram/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ganiyevuz/django-backupgram/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/ganiyevuz/django-backupgram/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/ganiyevuz/django-backupgram/releases/tag/v0.1.0
