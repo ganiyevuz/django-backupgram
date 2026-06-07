@@ -57,7 +57,30 @@ pip install django-backupgram
    - **Base URL** — the backup container's REST API endpoint, e.g.
      `https://backup:8081`. Docker service names are allowed (the request is
      made server-side).
-   - **Token** — the bearer token configured via `REST_API_TOKEN` on the container.
+   - **Token** — the bearer token configured via `REST_API_TOKEN` on the container
+     (see below).
+
+### The API token
+
+The token is the backup container's single admin bearer key — you generate it
+yourself and set it on the container, then paste the **same** value into the
+**Token** field here.
+
+Generate a high-entropy value (≥ 32 bytes of randomness):
+
+```bash
+openssl rand -base64 48
+# or
+python3 -c "import secrets; print(secrets.token_urlsafe(48))"
+```
+
+Set it on the backup container via `REST_API_TOKEN` (or, recommended,
+`REST_API_TOKEN_FILE` pointing at a Docker secret), then enter the same token in
+admin. The container compares it in constant time and refuses to start if the API
+is enabled without one; here it is stored **encrypted at rest** and sent only
+server-side. To **rotate**: change it on the container, recreate it, and update
+the Token field. See the
+[REST API auth docs](https://github.com/ganiyevuz/docker-postgres-backup-telegram/blob/main/docs/REST_API.md#authentication).
 
 ## Usage
 
